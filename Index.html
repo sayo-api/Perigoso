@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Restrito</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #000000 0%, #1a0000 50%, #330000 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Partículas de fundo */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 0, 0, 0.3);
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Tela de Login */
+        .login-container {
+            position: relative;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 
+                0 0 30px rgba(255, 0, 0, 0.3),
+                inset 0 0 30px rgba(255, 0, 0, 0.1);
+            animation: glow-border 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow-border {
+            from {
+                box-shadow: 
+                    0 0 30px rgba(255, 0, 0, 0.3),
+                    inset 0 0 30px rgba(255, 0, 0, 0.1);
+            }
+            to {
+                box-shadow: 
+                    0 0 50px rgba(255, 0, 0, 0.6),
+                    inset 0 0 50px rgba(255, 0, 0, 0.2);
+            }
+        }
+
+        .login-title {
+            color: white;
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            animation: pulse-text 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-text {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            color: white;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: rgba(255, 0, 0, 0.8);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            transform: scale(1.02);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, #ff0000, #cc0000);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 0, 0, 0.5);
+            background: linear-gradient(45deg, #ff3333, #ff0000);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            text-align: center;
+            animation: shake-error 0.5s ease-in-out;
+        }
+
+        @keyframes shake-error {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Página Principal */
+        .message-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+
+        .message {
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: bold;
+            color: white;
+            text-shadow: 
+                0 0 10px rgba(255, 0, 0, 0.8),
+                0 0 20px rgba(255, 0, 0, 0.6),
+                0 0 30px rgba(255, 0, 0, 0.4),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
+            
+            background: linear-gradient(45deg, #ff0000, #ffffff, #ff4444);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            
+            animation: 
+                glow 2s ease-in-out infinite alternate,
+                gradient 3s ease infinite,
+                pulse 1.5s ease-in-out infinite,
+                shake 0.1s ease-in-out infinite;
+            
+            letter-spacing: 2px;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 
+                    0 0 10px rgba(255, 0, 0, 0.8),
+                    0 0 20px rgba(255, 0, 0, 0.6),
+                    0 0 30px rgba(255, 0, 0, 0.4);
+            }
+            to {
+                text-shadow: 
+                    0 0 20px rgba(255, 0, 0, 1),
+                    0 0 30px rgba(255, 0, 0, 0.8),
+                    0 0 40px rgba(255, 0, 0, 0.6);
+            }
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-1px);
+            }
+            75% {
+                transform: translateX(1px);
+            }
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle 2s infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 0, 0, 0.8);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            z-index: 20;
+            display: none;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 0, 0, 1);
+            transform: scale(1.05);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .message {
+                font-size: clamp(1.5rem, 6vw, 2.5rem);
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <!-- Tela de Login -->
+    <div class="login-container" id="loginContainer">
+        <h2 class="login-title">ACESSO RESTRITO</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Usuário:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="login-btn">ENTRAR</button>
+            <div id="errorMessage" style="display: none;"></div>
+        </form>
+    </div>
+
+    <!-- Página Principal -->
+    <div class="message-container" id="messageContainer">
+        <div class="message" id="message">
+            krl se tava moh gata hoje
+        </div>
+    </div>
+
+    <!-- Botão de Logout -->
+    <button class="logout-btn" id="logoutBtn">Sair</button>
+
+    <script>
+        // Variáveis globais
+        const loginContainer = document.getElementById('loginContainer');
+        const messageContainer = document.getElementById('messageContainer');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Credenciais
+        const validUsername = 'ali';
+        const validPassword = 'cia';
+
+        // Criar partículas
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Criar efeitos de brilho
+        function createSparkles() {
+            const messageElement = document.getElementById('message');
+            
+            const sparkleInterval = setInterval(() => {
+                if (messageContainer.style.display === 'none') {
+                    clearInterval(sparkleInterval);
+                    return;
+                }
+                
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                messageElement.appendChild(sparkle);
+
+                setTimeout(() => {
+                    if (sparkle.parentNode) {
+                        sparkle.remove();
+                    }
+                }, 2000);
+            }, 300);
+        }
+
+        // Efeito de digitação
+        function typeWriter() {
+            const text = "krl se tava moh gata hoje";
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = '';
+            
+            let i = 0;
+            const timer = setInterval(() => {
+                messageElement.textContent += text.charAt(i);
+                i++;
+                if (i > text.length - 1) {
+                    clearInterval(timer);
+                    createSparkles();
+                }
+            }, 100);
+        }
+
+        // Função de login
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === validUsername && password === validPassword) {
+                // Login bem-sucedido
+                loginContainer.style.display = 'none';
+                messageContainer.style.display = 'block';
+                logoutBtn.style.display = 'block';
+                
+                // Iniciar animações da página principal
+                setTimeout(typeWriter, 500);
+            } else {
+                // Login falhou
+                showError('Usuário ou senha incorretos!');
+                
+                // Limpar campos
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+            }
+        }
+
+        // Mostrar erro
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.className = 'error-message';
+            errorMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Função de logout
+        function handleLogout() {
+            loginContainer.style.display = 'block';
+            messageContainer.style.display = 'none';
+            logoutBtn.style.display = 'none';
+            
+            // Limpar campos de login
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            
+            // Limpar sparkles
+            const sparkles = document.querySelectorAll('.sparkle');
+            sparkles.forEach(sparkle => sparkle.remove());
+        }
+
+        // Event listeners
+        loginForm.addEventListener('submit', handleLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+
+        // Efeito de clique no fundo
+        document.addEventListener('click', (e) => {
+            if (messageContainer.style.display === 'block' && 
+                !e.target.closest('.logout-btn')) {
+                const body = document.body;
+                body.style.background = 'linear-gradient(135deg, #330000 0%, #000000 50%, #1a0000 100%)';
+                setTimeout(() => {
+                    body.style.background = 'linear-gradient(135deg, #000000 0%, #1a0000 50%, #330000 100%)';
+                }, 200);
+            }
+        });
+
+        // Permitir Enter para fazer login
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && loginContainer.style.display !== 'none') {
+                handleLogin(e);
+            }
+        });
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+        });
+    </script>
+</body>
+</html>
